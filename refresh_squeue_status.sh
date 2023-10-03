@@ -4,23 +4,33 @@
 # 03Oct23  Richard Yang
 nap=1
 ACCOUNT=yzhan567
-RunNum=`squeue -rA $ACCOUNT -ho %i -t RUNNING | wc -l`
-PendingNum=`squeue -rA $ACCOUNT -ho %i -t PENDING | wc -l`
-TotNum=`squeue -rA $ACCOUNT -ho %i | wc -l`
-while [ $RunNum -gt 0 ]; do 
+Run=`squeue -rA $ACCOUNT -ho %i -t RUNNING | wc -l`
+Pend=`squeue -rA $ACCOUNT -ho %i -t PENDING | wc -l`
+Tot=`squeue -rA $ACCOUNT -ho %i | wc -l`
+
+u_flag=false
+
+# Check through command-line arguments
+for arg in $@; do
+	if [ $arg = '-u' ]; then
+		u_flag=true
+	fi
+done
+
+while [ $Tot -gt 0 ]; do 
 	clear
 	squeue -A $ACCOUNT 
-	echo $RunNum jobs currently running, $PendingNum jobs pending, $TotNum total.
-	if [ $# -gt 0 ] && [ $1 = '-u' ]; then
+	echo $Run jobs currently running, $Pend jobs pending, $Tot total.
+	if $u_flag ; then
 		echo 
 		echo Displaying squeue for user:
 		squeue -u $USER
 	fi 
 	echo refresh in $nap s
 	sleep $nap
-	RunNum=`squeue -rA $ACCOUNT -ho %i -t RUNNING | wc -l`
-	PendingNum=`squeue -rA $ACCOUNT -ho %i -t PENDING | wc -l`
-	TotNum=`squeue -rA $ACCOUNT -ho %i | wc -l`
+	Run=`squeue -rA $ACCOUNT -ho %i -t RUNNING | wc -l`
+	Pend=`squeue -rA $ACCOUNT -ho %i -t PENDING | wc -l`
+	Tot=`squeue -rA $ACCOUNT -ho %i | wc -l`
     	echo refreshing...
 done
 echo "No job in queue!"
